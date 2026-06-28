@@ -1,69 +1,18 @@
-# 📘 Programming Language Concepts
+# Go Programming Concepts
 
-Welcome to the **Programming Language Concepts** repository.  
-This section contains structured tutorials, common error explanations, and core programming comparisons for Go and JavaScript.
-
----
-
-## 🟢 Go Language Tutorial
-
-Comprehensive notes and common mistakes to strengthen your Go fundamentals.
-
-### 🔹 Common Errors in Go
-
-Learn about frequently occurring errors in Go, why they happen, and how to fix them.
-
-👉 https://github.com/Krishna-hacker-venom/programming_language_concepts/blob/main/go%20language%20common%20error%20.md
+Welcome to the Go documentation and reference repository. This section focuses on structured syntax tutorials, idiomatic language patterns, and runtime error explanations specifically for the Go programming language.
 
 ---
 
-### 🔹 Object Creation Errors (Go & JS Context)
+## Technical Reference Guides
 
-Understand common object-related mistakes developers make and how to avoid them with proper structure and syntax understanding.
-
-👉 https://github.com/Krishna-hacker-venom/programming_language_concepts/blob/main/creating%20object%20error%20in%20js.md
-
----
-
-## 🟡 JavaScript Concepts
-
-Clear explanations of fundamental JavaScript concepts with practical examples.
-
-### 🔹 JavaScript Loops
-
-Complete explanation of different loop types in JavaScript:
-
-- `for` loop  
-- `while` loop  
-- `do...while` loop  
-- `for...in` loop  
-- `for...of` loop  
-
-👉 https://github.com/Krishna-hacker-venom/programming_language_concepts/blob/main/for-loop%20.md
+### Troubleshooting & Error Resolution
+*   **Go Language Common Errors:** A curated reference guide cataloging frequent Go runtime panics, compilation errors, and syntax edge cases alongside actionable, step-by-step remediation steps.
 
 ---
 
-## 🔵 Operator Concepts Across Languages
+## Repository Design & Usage
 
-### 🔹 Arrow vs Fat Operator
+Each document in this directory is fully self-contained with production-ready code blocks designed for rapid reference during development. 
 
-Complete explanation and comparison of arrow and fat operators in different programming languages such as:
-
-- JavaScript  
-- PHP  
-- C / C++  
-- Other programming languages  
-
-Topics covered:
-
-- Syntax differences  
-- Use cases  
-- Scope behavior  
-- Functional programming impact  
-
-👉 https://github.com/Krishna-hacker-venom/programming_language_concepts/blob/main/arrow%20vs%20fat%20operator%20.md
-
----
-
-
-🚀 **Keep Learning. Keep Building. Keep Improving.**
+If you are looking for other language domains or relational database references, please navigate back to the root directory to find dedicated documentation for JavaScript, Python, and SQL/PostgreSQL.
