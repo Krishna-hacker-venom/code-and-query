@@ -1,540 +1,352 @@
-# Python Asyncio Notes - Understanding Coroutines
+# Why Does `print(result)` Show a Coroutine Object Instead of the Function Output?
 
-## Table of Contents
-
-1. What is `asyncio`?
-2. Understanding `async def`
-3. What Happens When You Call an Async Function?
-4. What is a Coroutine Object?
-5. Understanding `<coroutine object ...>`
-6. What is a Coroutine?
-7. Normal Function vs Coroutine
-8. How `await` Works
-9. Why Doesn't an Async Function Execute Immediately?
-10. Event Loop
-11. Complete Execution Flow
-12. Key Takeaways
-
----
-
-# What is `asyncio`?
-
-`asyncio` is Python's built-in library for writing **asynchronous programs**.
-
-Instead of waiting for one task to finish before starting another, `asyncio` allows multiple tasks to make progress concurrently.
-
-Example:
+One of the most confusing parts of learning `asyncio` is understanding why this code:
 
 ```python
 import asyncio
-```
 
----
-
-# Understanding `async def`
-
-Example:
-
-```python
 async def greet_after_delay():
     print("Let's start")
     await asyncio.sleep(5)
     print("End")
-```
 
-Adding the keyword `async` before `def` creates an **asynchronous function** (also called a *coroutine function*).
-
-Unlike normal functions, async functions are designed to pause and resume execution.
-
----
-
-# What Happens When You Call an Async Function?
-
-Example:
-
-```python
 result = greet_after_delay()
+
+print(result)
 ```
 
-Many beginners expect this to execute the function immediately.
-
-It **does not**.
-
-Instead, Python creates a **Coroutine Object**.
-
-Nothing inside the function runs.
-
-Example:
-
-```python
-async def greet():
-    print("Hello")
-
-result = greet()
-```
-
-Output:
-
-```python
-<coroutine object greet at 0x...>
-```
-
-Notice that `"Hello"` is never printed because the coroutine has not been executed.
-
----
-
-# What is a Coroutine Object?
-
-A coroutine object is an object created when an async function is called.
-
-Think of it as a **paused function waiting to be executed**.
-
-It contains:
-
-* The code to execute
-* Current execution state
-* Local variables
-* Information about where execution should resume
-
-Analogy:
-
-Calling an async function is like receiving a movie ticket.
-
-```text
-Movie Ticket
-
-Movie : greet_after_delay
-Seat  : 0x12345678
-
-The movie hasn't started yet.
-```
-
-The ticket only represents the future execution.
-
----
-
-# Understanding `<coroutine object greet_after_delay at 0x...>`
-
-Example output:
+prints something like:
 
 ```text
 <coroutine object greet_after_delay at 0x00000123456789>
 ```
 
-Let's break it down.
-
-## Part 1
+instead of:
 
 ```text
-coroutine
+Let's start
+End
 ```
-
-The object's type.
-
-Python is telling you this object is a coroutine.
 
 ---
 
-## Part 2
+## Understanding What a Variable Stores
 
-```text
-object
-```
+A variable stores **whatever value is returned by the expression on the right side of the assignment operator (`=`).**
 
-Everything in Python is an object.
-
-Examples:
+### Normal Function
 
 ```python
-5                # Integer Object
-"Hello"          # String Object
-[1,2,3]          # List Object
+def add():
+    return 10
+
+result = add()
+
+print(result)
 ```
-
-Likewise,
-
-```python
-greet_after_delay()
-```
-
-creates a Coroutine Object.
-
----
-
-## Part 3
-
-```text
-greet_after_delay
-```
-
-This is the name of the async function that created the coroutine.
-
----
-
-## Part 4
-
-```text
-0x00000123456789
-```
-
-This is the object's memory address (identity shown in hexadecimal).
-
-The address changes every time you run the program because a new coroutine object is created each time.
-
----
-
-# What is a Coroutine?
-
-## Definition
-
-A coroutine is a **special function that can pause its execution and later continue from exactly where it stopped**.
-
-Unlike normal functions, coroutines remember:
-
-* Current line of execution
-* Local variables
-* Execution state
-
-Example:
-
-```python
-async def example():
-    x = 10
-
-    await asyncio.sleep(5)
-
-    print(x)
-```
-
-After five seconds,
-
-```
-x
-```
-
-is still `10`.
-
-The coroutine remembered its state while it was paused.
-
----
-
-# Normal Function vs Coroutine
-
-| Normal Function                  | Coroutine                      |
-| -------------------------------- | ------------------------------ |
-| Executes immediately             | Returns a coroutine object     |
-| Cannot pause                     | Can pause using `await`        |
-| Blocks while waiting             | Allows other coroutines to run |
-| Starts from beginning every call | Resumes where it paused        |
-
----
-
-# How `await` Works
-
-Example:
-
-```python
-await asyncio.sleep(5)
-```
-
-This **does not block the entire program**.
-
-Instead it means:
-
-> Pause this coroutine.
-> While I'm waiting, let another coroutine run.
 
 Execution Flow:
 
+```text
+add()
+
+↓
+
+Function executes immediately
+
+↓
+
+Returns 10
+
+↓
+
+result = 10
+
+↓
+
+print(result)
+
+↓
+
+10
 ```
-Coroutine Starts
-        │
-        ▼
-Runs normally
-        │
-        ▼
-await
-        │
-        ▼
-Coroutine Pauses
-        │
-        ▼
-Other coroutines execute
-        │
-        ▼
-Operation finishes
-        │
-        ▼
-Coroutine resumes
-```
+
+Here, `result` stores the integer `10`.
 
 ---
 
-# Why Doesn't an Async Function Execute Immediately?
+### Async Function
 
-Python separates two different things.
+```python
+import asyncio
 
-## Step 1
+async def add():
+    return 10
 
-Create a coroutine object.
+result = add()
+
+print(result)
+```
+
+Execution Flow:
+
+```text
+add()
+
+↓
+
+Function DOES NOT execute
+
+↓
+
+Python creates a Coroutine Object
+
+↓
+
+result = Coroutine Object
+
+↓
+
+print(result)
+
+↓
+
+<coroutine object add at 0x...>
+```
+
+Notice that `10` is **never returned**, because the coroutine has never been executed.
+
+---
+
+# What Does `result` Actually Store?
+
+After this line:
 
 ```python
 result = greet_after_delay()
 ```
 
-## Step 2
+Memory looks like this:
 
-Execute it.
-
-```python
-asyncio.run(result)
+```text
+result
+   │
+   ▼
+Coroutine Object
 ```
 
-or
+It does **not** look like this:
 
-```python
-await result
+```text
+result
+   │
+   ▼
+"Let's start"
+"End"
 ```
 
-This separation allows Python's Event Loop to decide **when** each coroutine should run.
+The function body has not run yet.
 
 ---
 
-# Event Loop
+# Why Does Python Print the Memory Address?
 
-The Event Loop is the engine that executes coroutines.
+When you print an object, Python displays its **string representation**.
 
-Example:
+For a coroutine object, that representation looks like:
 
-```python
-asyncio.run(greet_after_delay())
+```text
+<coroutine object greet_after_delay at 0x00000123456789>
 ```
 
-Execution Flow:
+Breaking it down:
 
+```text
+<coroutine object greet_after_delay at 0x00000123456789>
+
+coroutine
+    │
+    └── Object Type
+
+greet_after_delay
+    │
+    └── Async function that created the coroutine
+
+0x00000123456789
+    │
+    └── Memory address (object identity in hexadecimal)
 ```
-Create Event Loop
-        │
-        ▼
-Start Coroutine
-        │
-        ▼
-Execute code
-        │
-        ▼
-await encountered
-        │
-        ▼
-Pause coroutine
-        │
-        ▼
-Run another coroutine
-        │
-        ▼
-Resume paused coroutine
-        │
-        ▼
-Finish
-```
+
+The memory address changes every time you run the program because a new coroutine object is created each time.
 
 ---
 
-# Complete Execution Flow
+# How Do We Get the Actual Output?
+
+A coroutine must be executed by the Event Loop.
 
 Example:
 
 ```python
 import asyncio
 
-async def greet_after_delay():
-    print("Let's start")
+async def add():
+    return 10
 
-    await asyncio.sleep(5)
-
-    print("End")
-
-result = greet_after_delay()
+result = asyncio.run(add())
 
 print(result)
-
-print(type(result))
 ```
 
-Execution:
-
-```
-Program Starts
-      │
-      ▼
-Import asyncio
-      │
-      ▼
-Create async function
-      │
-      ▼
-Call async function
-      │
-      ▼
-Coroutine Object Created
-      │
-      ▼
-Nothing inside function executes
-      │
-      ▼
-print(result)
-      │
-      ▼
-<coroutine object greet_after_delay at ...>
-      │
-      ▼
-print(type(result))
-      │
-      ▼
-<class 'coroutine'>
-```
-
-Notice:
-
-```
-print("Let's start")
-```
-
-never executes because the coroutine was never run.
-
----
-
-# Important Terminology
-
-## Async Function (Coroutine Function)
-
-Defined using:
-
-```python
-async def greet():
-    ...
-```
-
-This is only the blueprint.
-
----
-
-## Coroutine Object
-
-Created when calling the async function.
-
-```python
-coro = greet()
-```
-
-Output:
+Execution Flow:
 
 ```text
-<coroutine object greet at 0x...>
+add()
+
+↓
+
+Coroutine Object Created
+
+↓
+
+asyncio.run()
+
+↓
+
+Event Loop Starts
+
+↓
+
+Coroutine Executes
+
+↓
+
+Returns 10
+
+↓
+
+result = 10
+
+↓
+
+print(result)
+
+↓
+
+10
 ```
 
----
-
-## Executing a Coroutine
-
-Using
-
-```python
-await greet()
-```
-
-or
-
-```python
-asyncio.run(greet())
-```
-
----
-
-# Beginner Mistakes
-
-❌ Wrong
-
-```python
-result = greet()
-```
-
-"I executed the async function."
-
-No.
-
-You only created a coroutine object.
-
----
-
-❌ Wrong
-
-```python
-await
-```
-
-"Stops the whole program."
-
-No.
-
-It pauses **only the current coroutine**.
-
----
-
-❌ Wrong
-
-```python
-asyncio.sleep(5)
-```
-
-"It blocks like time.sleep()."
-
-No.
-
-It yields control back to the Event Loop.
+Now the variable stores the function's return value instead of the coroutine object.
 
 ---
 
 # Mental Model
 
-Think of an async function like a recipe.
+Imagine ordering a pizza.
 
-```
-async def greet()
-```
+## Normal Function
+
+```text
+Order Pizza
 
 ↓
 
-Recipe
+Pizza is cooked immediately
+
+↓
+
+You receive Pizza
+
+↓
+
+result = Pizza
+```
 
 ---
 
-```
-greet()
-```
+## Async Function
+
+```text
+Order Pizza
 
 ↓
 
-Recipe Card (Coroutine Object)
+Restaurant gives you an Order Token
+
+↓
+
+result = Order Token
+
+↓
+
+Kitchen cooks later (Event Loop)
+
+↓
+
+Pizza becomes available
+```
+
+The coroutine object is like the **order token**.
+
+It represents work that **will happen later**, not the completed result.
 
 ---
 
+# Common Beginner Mistake
+
+Many beginners think this:
+
+```python
+result = greet_after_delay()
 ```
-await greet()
-```
+
+means:
+
+```text
+Run the function
 
 ↓
 
-Chef starts cooking (Event Loop executes the coroutine)
+Store the output
+```
+
+This is **incorrect**.
+
+What actually happens is:
+
+```text
+Call async function
+
+↓
+
+Create Coroutine Object
+
+↓
+
+Store Coroutine Object
+
+↓
+
+Wait until the Event Loop executes it
+```
+
+---
+
+# Important Interview Question
+
+### Q: Why does `print(result)` print `<coroutine object ...>` instead of the function output?
+
+**Answer:**
+
+Calling an async function does **not execute** the function. It creates and returns a **Coroutine Object**. Therefore, the variable stores the coroutine object, not the function's return value. The coroutine must be executed using `await` or `asyncio.run()` before the actual result becomes available.
 
 ---
 
 # Key Takeaways
 
-* `async def` creates an asynchronous function.
-* Calling an async function **does not execute it**.
-* It returns a **Coroutine Object**.
-* A coroutine object contains everything needed to execute the function later.
-* `await` pauses only the current coroutine.
-* While paused, other coroutines can run.
-* The Event Loop schedules, pauses, resumes, and completes coroutine execution.
-* Coroutines are the foundation of Python's `asyncio` library.
+* Variables store whatever the right-hand expression returns.
+* Calling a normal function returns its final value.
+* Calling an async function returns a **Coroutine Object**.
+* `print(result)` prints the coroutine object's representation because that is what the variable contains.
+* The Event Loop (`await` or `asyncio.run()`) is responsible for executing the coroutine and producing the real output.
+* A coroutine object represents **future work**, not completed work.
